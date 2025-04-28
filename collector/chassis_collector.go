@@ -21,6 +21,7 @@ var (
 	ChassisFanLabelNames              = []string{"resource", "chassis_id", "fan", "fan_id", "fan_unit"}
 	ChassisPowerVoltageLabelNames     = []string{"resource", "chassis_id", "power_voltage", "power_voltage_id"}
 	ChassisPowerSupplyLabelNames      = []string{"resource", "chassis_id", "power_supply", "power_supply_id"}
+	ChassisPowerControlLabelNames     = []string{"resource", "chassis_id", "power_control", "power_control_id"}
 	ChassisNetworkAdapterLabelNames   = []string{"resource", "chassis_id", "network_adapter", "network_adapter_id"}
 	ChassisNetworkPortLabelNames      = []string{"resource", "chassis_id", "network_adapter", "network_adapter_id", "network_port", "network_port_id", "network_port_type", "network_port_speed", "network_port_connectiont_type", "network_physical_port_number"}
 	ChassisPhysicalSecurityLabelNames = []string{"resource", "chassis_id", "intrusion_sensor_number", "intrusion_sensor_rearm"}
@@ -65,6 +66,7 @@ func createChassisMetricMap() map[string]Metric {
 	addToMetricMap(chassisMetrics, ChassisSubsystem, "power_voltage_state", fmt.Sprintf("power voltage state of chassis component,%s", CommonStateHelp), ChassisPowerVoltageLabelNames)
 	addToMetricMap(chassisMetrics, ChassisSubsystem, "power_voltage_volts", "power voltage volts number of chassis component", ChassisPowerVoltageLabelNames)
 	addToMetricMap(chassisMetrics, ChassisSubsystem, "power_average_consumed_watts", "power wattage watts number of chassis component", ChassisPowerVoltageLabelNames)
+	addToMetricMap(chassisMetrics, ChassisSubsystem, "power_consumed_watts", "power consumed in watts of this chassis", ChassisPowerControlLabelNames)
 
 	addToMetricMap(chassisMetrics, ChassisSubsystem, "power_powersupply_state", fmt.Sprintf("powersupply state of chassis component,%s", CommonStateHelp), ChassisPowerSupplyLabelNames)
 	addToMetricMap(chassisMetrics, ChassisSubsystem, "power_powersupply_health", fmt.Sprintf("powersupply health of chassis component,%s", CommonHealthHelp), ChassisPowerSupplyLabelNames)
@@ -267,7 +269,7 @@ func parseChassisTemperature(ch chan<- prometheus.Metric, chassisID string, chas
 	chassisTemperatureStatus := chassisTemperature.Status
 	chassisTemperatureLabelvalues := []string{"temperature", chassisID, chassisTemperatureSensorName, chassisTemperatureSensorID}
 
-	chassisTemperatureStatusHealth :=chassisTemperatureStatus.Health
+	chassisTemperatureStatusHealth := chassisTemperatureStatus.Health
 	if chassisTemperatureStatusHealthValue, ok := parseCommonStatusHealth(chassisTemperatureStatusHealth); ok {
 		ch <- prometheus.MustNewConstMetric(chassisMetrics["chassis_temperature_sensor_health"].desc, prometheus.GaugeValue, chassisTemperatureStatusHealthValue, chassisTemperatureLabelvalues...)
 	}
@@ -351,8 +353,10 @@ func parseChassisPowerInfoPowerControl(ch chan<- prometheus.Metric, chassisID st
 	name := chassisPowerInfoPowerControl.Name
 	id := chassisPowerInfoPowerControl.MemberID
 	pm := chassisPowerInfoPowerControl.PowerMetrics
+	pcw := chassisPowerInfoPowerControl.PowerConsumedWatts
 	chassisPowerVoltageLabelvalues := []string{"power_wattage", chassisID, name, id}
 	ch <- prometheus.MustNewConstMetric(chassisMetrics["chassis_power_average_consumed_watts"].desc, prometheus.GaugeValue, float64(pm.AverageConsumedWatts), chassisPowerVoltageLabelvalues...)
+	ch <- prometheus.MustNewConstMetric(chassisMetrics["chassis_power_consumed_watts"].desc, prometheus.GaugeValue, float64(pcw), chassisPowerVoltageLabelvalues...)
 }
 
 func parseChassisPowerInfoPowerSupply(ch chan<- prometheus.Metric, chassisID string, chassisPowerInfoPowerSupply redfish.PowerSupply, wg *sync.WaitGroup) {

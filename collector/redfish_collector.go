@@ -106,10 +106,11 @@ func newRedfishClient(host string, username string, password string) (*gofish.AP
 	url := fmt.Sprintf("https://%s", host)
 
 	config := gofish.ClientConfig{
-		Endpoint: url,
-		Username: username,
-		Password: password,
-		Insecure: true,
+		Endpoint:              url,
+		Username:              username,
+		Password:              password,
+		Insecure:              true,
+		MaxConcurrentRequests: 15,
 	}
 	redfishClient, err := gofish.Connect(config)
 	if err != nil {
@@ -194,7 +195,7 @@ func parseLinkStatus(status redfish.LinkStatus) (float64, bool) {
 	return float64(0), false
 }
 
-func parsePortLinkStatus(status redfish.PortLinkStatus) (float64, bool) {
+func parsePortLinkStatus(status redfish.NetworkPortLinkStatus) (float64, bool) {
 	if bytes.Equal([]byte(status), []byte("Up")) {
 		return float64(1), true
 	}

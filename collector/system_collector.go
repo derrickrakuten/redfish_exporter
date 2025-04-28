@@ -177,7 +177,7 @@ func (s *SystemCollector) Collect(ch chan<- prometheus.Metric) {
 			if systemTotalMemoryHealthStateValue, ok := parseCommonStatusHealth(systemTotalMemoryHealthState); ok {
 				ch <- prometheus.MustNewConstMetric(s.metrics["system_total_memory_health_state"].desc, prometheus.GaugeValue, systemTotalMemoryHealthStateValue, systemLabelValues...)
 			}
-			
+
 			// get system OdataID
 			//systemOdataID := system.ODataID
 
@@ -356,21 +356,21 @@ func (s *SystemCollector) Collect(ch chan<- prometheus.Metric) {
 				}
 			}
 
-			// process log services
-			logServices, err := system.LogServices()
-			if err != nil {
-				systemLogContext.WithField("operation", "system.LogServices()").WithError(err).Error("error getting log services from system")
-			} else if logServices == nil {
-				systemLogContext.WithField("operation", "system.LogServices()").Info("no log services found")
-			} else {
-				wg10.Add(len(logServices))
+			// // process log services
+			// logServices, err := system.LogServices()
+			// if err != nil {
+			// 	systemLogContext.WithField("operation", "system.LogServices()").WithError(err).Error("error getting log services from system")
+			// } else if logServices == nil {
+			// 	systemLogContext.WithField("operation", "system.LogServices()").Info("no log services found")
+			// } else {
+			// 	wg10.Add(len(logServices))
 
-				for _, logService := range logServices {
-					if err = parseLogService(ch, systemMetrics, SystemSubsystem, SystemID, logService, wg10); err != nil {
-						systemLogContext.WithField("operation", "system.LogServices()").WithError(err).Error("error getting log entries from log service")
-					}
-				}
-			}
+			// 	for _, logService := range logServices {
+			// 		if err = parseLogService(ch, systemMetrics, SystemSubsystem, SystemID, logService, wg10); err != nil {
+			// 			systemLogContext.WithField("operation", "system.LogServices()").WithError(err).Error("error getting log entries from log service")
+			// 		}
+			// 	}
+			// }
 
 			wg1.Wait()
 			wg2.Wait()

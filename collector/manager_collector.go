@@ -2,7 +2,7 @@ package collector
 
 import (
 	"fmt"
-	"sync"
+	// "sync"
 
 	"github.com/apex/log"
 	"github.com/prometheus/client_golang/prometheus"
@@ -104,21 +104,21 @@ func (m *ManagerCollector) Collect(ch chan<- prometheus.Metric) {
 			}
 
 			// process log services
-			logServices, err := manager.LogServices()
-			if err != nil {
-				managerLogContext.WithField("operation", "manager.LogServices()").WithError(err).Error("error getting log services from manager")
-			} else if logServices == nil {
-				managerLogContext.WithField("operation", "manager.LogServices()").Info("no log services found")
-			} else {
-				wg := &sync.WaitGroup{}
-				wg.Add(len(logServices))
+			// logServices, err := manager.LogServices()
+			// if err != nil {
+			// 	managerLogContext.WithField("operation", "manager.LogServices()").WithError(err).Error("error getting log services from manager")
+			// } else if logServices == nil {
+			// 	managerLogContext.WithField("operation", "manager.LogServices()").Info("no log services found")
+			// } else {
+			// 	wg := &sync.WaitGroup{}
+			// 	wg.Add(len(logServices))
 
-				for _, logService := range logServices {
-					if err = parseLogService(ch, managerMetrics, ManagerSubmanager, ManagerID, logService, wg); err != nil {
-						managerLogContext.WithField("operation", "manager.LogServices()").WithError(err).Error("error getting log entries from log service")
-					}
-				}
-			}
+			// 	for _, logService := range logServices {
+			// 		if err = parseLogService(ch, managerMetrics, ManagerSubmanager, ManagerID, logService, wg); err != nil {
+			// 			managerLogContext.WithField("operation", "manager.LogServices()").WithError(err).Error("error getting log entries from log service")
+			// 		}
+			// 	}
+			// }
 
 			managerLogContext.Info("collector scrape completed")
 		}
